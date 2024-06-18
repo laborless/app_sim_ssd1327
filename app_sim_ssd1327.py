@@ -1,55 +1,46 @@
 import tkinter as tk
-from tkinter import colorchooser
+from PIL import Image, ImageTk, ImageDraw
 
-class PaintApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Paint App")
+# Initialize the main application window
+root = tk.Tk()
+root.title("Python Paint App")
 
-        # Set up the canvas
-        self.canvas = tk.Canvas(self.root, bg='white', width=128, height=128)
-        self.canvas.pack()
+# Create a 128x128 white image
+image = Image.new("RGB", (128, 128), "white")
+image_draw = ImageDraw.Draw(image)
 
-        # Initialize color and brush size
-        self.brush_color = 'black'
-        self.brush_size = 5
+# Function to update the image when drawing
+def paint(event):
+    x1, y1 = (event.x - 1), (event.y - 1)
+    x2, y2 = (event.x + 1), (event.y + 1)
+    image_draw.ellipse([x1, y1, x2, y2], fill="black", outline="black")
+    canvas.create_oval(x1, y1, x2, y2, fill="black", outline="black")
+    update_pixel_value(event.x, event.y)
 
-        # Bind mouse events to canvas
-        self.canvas.bind('<B1-Motion>', self.paint)
-        self.canvas.bind('<ButtonRelease-1>', self.reset)
+# Function to update the displayed pixel value
+def update_pixel_value(x, y):
+    pixel_value = image.getpixel((x, y))
+    pixel_value_label.config(text=f"Pixel value: {pixel_value}")
 
-        # Create color picker button
-        self.color_button = tk.Button(self.root, text='Pick Color', command=self.choose_color)
-        self.color_button.pack(side='left')
+# Create a canvas to draw on
+canvas = tk.Canvas(root, width=128, height=128, bg="white")
+canvas.pack(side=tk.LEFT)
 
-        # Create brush size buttons
-        self.brush_size_frame = tk.Frame(self.root)
-        self.brush_size_frame.pack(side='left', fill='both', expand=True)
-        self.size_label = tk.Label(self.brush_size_frame, text='Brush Size:')
-        self.size_label.pack(side='left')
-        self.size_slider = tk.Scale(self.brush_size_frame, from_=1, to=10, orient='horizontal')
-        self.size_slider.set(self.brush_size)
-        self.size_slider.pack(side='left')
+# Bind mouse events to the canvas
+canvas.bind("<B1-Motion>", paint)
 
-    def paint(self, event):
-        # Get brush size and color
-        brush_size = self.size_slider.get()
-        color = self.brush_color
-        
-        # Draw an oval (dot) where the mouse is
-        x1, y1 = (event.x - brush_size), (event.y - brush_size)
-        x2, y2 = (event.x + brush_size), (event.y + brush_size)
-        self.canvas.create_oval(x1, y1, x2, y2, fill=color, outline=color)
+# Create a label to display pixel values
+pixel_value_label = tk.Label(root, text="Pixel value: (0, 0, 0)")
+pixel_value_label.pack(side=tk.RIGHT)
 
-    def reset(self, event):
-        # Reset the last_drawn variable
-        self.last_drawn = None
+# Function to track mouse movement and update pixel value display
+def motion(event):
+    x, y = event.x, event.y
+    if 0 <= x < 128 and 0 <= y < 128:
+        update_pixel_value(x, y)
 
-    def choose_color(self):
-        # Open color chooser and set new brush color
-        self.brush_color = colorchooser.askcolor(color=self.brush_color)[1]
+# Bind the motion event to the canvas
+canvas.bind('<Motion>', motion)
 
-if __name__ == '__main__':
-    root = tk.Tk()
-    app = PaintApp(root)
-    root.mainloop()
+# Run the Tkinter event loop
+root.mainloop()
