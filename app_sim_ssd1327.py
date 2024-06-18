@@ -24,14 +24,14 @@ def update_pixel_value(x, y):
 
 # Create a canvas to draw on
 canvas = tk.Canvas(root, width=128, height=128, bg="white")
-canvas.pack(side=tk.LEFT)
+canvas.pack(side=tk.BOTTOM)
 
 # Bind mouse events to the canvas
 canvas.bind("<B1-Motion>", paint)
 
 # Create a label to display pixel values
 pixel_value_label = tk.Label(root, text="Pixel value: (0, 0, 0)")
-pixel_value_label.pack(side=tk.RIGHT)
+pixel_value_label.pack(side=tk.TOP)
 
 # Function to track mouse movement and update pixel value display
 def motion(event):
