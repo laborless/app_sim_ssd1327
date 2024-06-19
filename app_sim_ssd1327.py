@@ -2,7 +2,7 @@ import tkinter as tk
 from PIL import Image, ImageTk, ImageDraw
 
 # Constants
-PIXEL_SIZE = 20 # 4
+PIXEL_SIZE = 25 # 4
 LINE_WIDTH = 1
 X_RES = 20 # 128
 Y_RES = 20 # 128
@@ -26,6 +26,10 @@ def paint(event):
     x_st = x_grid * (PIXEL_SIZE + LINE_WIDTH)
     y_st = y_grid * (PIXEL_SIZE + LINE_WIDTH)
     canvas.create_rectangle(x_st, y_st, x_st + PIXEL_SIZE, y_st + PIXEL_SIZE, fill="black", width=0)
+
+    pixel_value = image.getpixel((x_grid, y_grid))
+    colour = "black" if pixel_value > 128 else "white"
+    canvas.create_text(x_st+PIXEL_SIZE//2, y_st+PIXEL_SIZE//2, text = f"{hex(pixel_value//16)}", fill=colour, font=(f'Helvetica {PIXEL_SIZE//3}'))
     
     update_pixel_value(x_grid, y_grid)
 
@@ -43,10 +47,19 @@ def calc_canvas_size(x_res, y_res):
 def update_canvas(canvas, x_res, y_res):
     c_width, c_height = calc_canvas_size(x_res, y_res)
     canvas.config(width=c_width, height=c_height)
-    for line in range(PIXEL_SIZE, sz_canv[0], PIXEL_SIZE+LINE_WIDTH):
-        canvas.create_line([(line, 0), (line, sz_canv[1])],fill='grey', tags='grid_line_w')
-    for line in range(PIXEL_SIZE, sz_canv[1], PIXEL_SIZE+LINE_WIDTH):
-        canvas.create_line([(0, line), (sz_canv[0], line)],fill='grey', tags='grid_line_h')
+    # draw_grid
+    for line in range(PIXEL_SIZE, c_width, PIXEL_SIZE+LINE_WIDTH):
+        canvas.create_line([(line, 0), (line, c_height)],fill='grey', tags='grid_line_w')
+    for line in range(PIXEL_SIZE, c_height, PIXEL_SIZE+LINE_WIDTH):
+        canvas.create_line([(0, line), (c_width, line)],fill='grey', tags='grid_line_h')
+    # draw colour
+    for pos_x in range(PIXEL_SIZE//2, c_width, PIXEL_SIZE+LINE_WIDTH):
+        for pos_y in range(+PIXEL_SIZE//2, c_height, PIXEL_SIZE+LINE_WIDTH):
+            x_grid = pos_x // (PIXEL_SIZE + LINE_WIDTH)
+            y_grid = pos_y // (PIXEL_SIZE + LINE_WIDTH)
+            pixel_value = image.getpixel((x_grid, y_grid))
+            colour = "black" if pixel_value > 128 else "white"
+            canvas.create_text(pos_x, pos_y, text = f"{hex(pixel_value//16)}", fill=colour, font=(f'Helvetica {PIXEL_SIZE//3}'))    
 
 # Row0 - Menu & Buttons
 btn_create = tk.Button(root, text="Create")
@@ -84,13 +97,22 @@ etr_output.grid(row=3, column=0, columnspan=5)
 
 # Row4 - canvas
 # Create a canvas to draw on
-sz_canv = calc_canvas_size(X_RES, Y_RES)
-canvas = tk.Canvas(root, width=sz_canv[0], height=sz_canv[1], bg="white", 
+c_width, c_height = calc_canvas_size(X_RES, Y_RES)
+canvas = tk.Canvas(root, width=c_width, height=c_height, bg="white", 
                    highlightthickness=0, borderwidth=0) # remove border
-for line in range(PIXEL_SIZE, sz_canv[0], PIXEL_SIZE+LINE_WIDTH):
-    canvas.create_line([(line, 0), (line, sz_canv[1])],fill='grey', tags='grid_line_w')
-for line in range(PIXEL_SIZE, sz_canv[1], PIXEL_SIZE+LINE_WIDTH):
-    canvas.create_line([(0, line), (sz_canv[0], line)],fill='grey', tags='grid_line_h')
+for line in range(PIXEL_SIZE, c_width, PIXEL_SIZE+LINE_WIDTH):
+    canvas.create_line([(line, 0), (line, c_height)],fill='grey', tags='grid_line_w')
+for line in range(PIXEL_SIZE, c_height, PIXEL_SIZE+LINE_WIDTH):
+    canvas.create_line([(0, line), (c_width, line)],fill='grey', tags='grid_line_h')
+    # draw colour
+    for pos_x in range(PIXEL_SIZE//2, c_width, PIXEL_SIZE+LINE_WIDTH):
+        for pos_y in range(+PIXEL_SIZE//2, c_height, PIXEL_SIZE+LINE_WIDTH):
+            x_grid = pos_x // (PIXEL_SIZE + LINE_WIDTH)
+            y_grid = pos_y // (PIXEL_SIZE + LINE_WIDTH)
+            pixel_value = image.getpixel((x_grid, y_grid))
+            colour = "black" if pixel_value > 128 else "white"
+            canvas.create_text(pos_x, pos_y, text = f"{hex(pixel_value//16)}", fill=colour, font=(f'Helvetica {PIXEL_SIZE//3}'))    
+
 canvas.grid(row=4, column=0, columnspan=5)
 
 # Bind mouse events to the canvas
