@@ -4,37 +4,35 @@ from PIL import Image, ImageTk, ImageDraw
 # Constants
 PIXEL_SIZE = 20 # 4
 LINE_WIDTH = 1
-X_RES = 10 # 128
-Y_RES = 10 # 128
+X_RES = 20 # 128
+Y_RES = 20 # 128
 
 # Initialize the main application window
 root = tk.Tk()
 root.title("Python Paint App")
 
-# Create a 128x128 white image
-image = Image.new("RGB", (X_RES, Y_RES), "white")
+# Create a 128x128 white image (8bit grey scale)
+image = Image.new("L", (X_RES, Y_RES), "white")
 image_draw = ImageDraw.Draw(image)
 
 # Function to update the image when drawing
 def paint(event):
     # to do brush color
-    # to do draw dot in image
-    x1, y1 = (event.x - 1), (event.y - 1)
-    x2, y2 = (event.x + 1), (event.y + 1)
-    image_draw.ellipse([x1, y1, x2, y2], fill="black", outline="black")
-
     x_grid = event.x // (PIXEL_SIZE + LINE_WIDTH)
     y_grid = event.y // (PIXEL_SIZE + LINE_WIDTH)
+    image_draw.point([(x_grid, y_grid)], fill="black")
+
+
     x_st = x_grid * (PIXEL_SIZE + LINE_WIDTH)
     y_st = y_grid * (PIXEL_SIZE + LINE_WIDTH)
     canvas.create_rectangle(x_st, y_st, x_st + PIXEL_SIZE, y_st + PIXEL_SIZE, fill="black", width=0)
     
-    # update_pixel_value(event.x, event.y)
+    update_pixel_value(x_grid, y_grid)
 
 # Function to update the displayed pixel value
-# def update_pixel_value(x, y):
-#     pixel_value = image.getpixel((x, y))
-#     pixel_value_label.config(text=f"Pixel value: {pixel_value}")
+def update_pixel_value(x, y):
+    pixel_value = image.getpixel((x, y))
+    pixel_value_label.config(text=f"Pixel value: {pixel_value}")
 
 def calc_canvas_size(x_res, y_res):
     width = x_res * PIXEL_SIZE + (x_res-1) * LINE_WIDTH
@@ -103,16 +101,23 @@ etr_log = tk.Entry(root)
 etr_log.insert("end", "hello log diablo is boring")
 etr_log.grid(row=5, column=0, columnspan=5)
 
+# Row6 read pixel value test
+pixel_value_label = tk.Label(root, text="pixel value")
+pixel_value_label.grid(row=6, column=0, columnspan=5)
+
+
 # Function to track mouse movement and update pixel value display
 def motion(event):
     x_grid = event.x // (PIXEL_SIZE + LINE_WIDTH)
     y_grid = event.y // (PIXEL_SIZE + LINE_WIDTH)
     etr_output.delete("0", "end")
     etr_output.insert("end", f"org:({event.x},{event.y}), grid:({x_grid},{y_grid})")
+
     # pixel_value_label.config(text=f"org:({event.x},{event.y}), grid:({x_grid},{y_grid})")
     # x, y = event.x, event.y
     # if 0 <= x < 128 and 0 <= y < 128:
-    #     update_pixel_value(x, y)
+        # update_pixel_value(x, y)
+    update_pixel_value(x_grid, y_grid)
 
 # Bind the motion event to the canvas
 canvas.bind('<Motion>', motion)
