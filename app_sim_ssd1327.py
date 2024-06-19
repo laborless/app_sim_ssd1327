@@ -12,15 +12,23 @@ root = tk.Tk()
 root.title("Python Paint App")
 
 # Create a 128x128 white image
-image = Image.new("RGB", (128, 128), "white")
+image = Image.new("RGB", (X_RES, Y_RES), "white")
 image_draw = ImageDraw.Draw(image)
 
 # Function to update the image when drawing
 def paint(event):
+    # to do brush color
+    # to do draw dot in image
     x1, y1 = (event.x - 1), (event.y - 1)
     x2, y2 = (event.x + 1), (event.y + 1)
     image_draw.ellipse([x1, y1, x2, y2], fill="black", outline="black")
-    canvas.create_oval(x1, y1, x2, y2, fill="black", outline="black")
+
+    x_grid = event.x // (PIXEL_SIZE + LINE_WIDTH)
+    y_grid = event.y // (PIXEL_SIZE + LINE_WIDTH)
+    x_st = x_grid * (PIXEL_SIZE + LINE_WIDTH)
+    y_st = y_grid * (PIXEL_SIZE + LINE_WIDTH)
+    canvas.create_rectangle(x_st, y_st, x_st + PIXEL_SIZE, y_st + PIXEL_SIZE, fill="black", width=0)
+    
     # update_pixel_value(event.x, event.y)
 
 # Function to update the displayed pixel value
