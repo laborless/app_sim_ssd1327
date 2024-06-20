@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 from PIL import Image, ImageTk, ImageDraw
 
 # Constants
@@ -12,14 +13,25 @@ root = tk.Tk()
 root.title("Python Paint App")
 
 # Create a 128x128 white image (8bit grey scale)
-image = Image.new("L", (X_RES, Y_RES), "white")
+image = Image.new("RGB", (X_RES, Y_RES), "white")
 image_draw = ImageDraw.Draw(image)
 
-def get_pixel_value(x, y):
-    return 255 - image.getpixel((x, y))
+def get_pixel_values():
+    pixstr = ""
+    width, height = image.size
+    for y in range(height):
+        for x in range(width):
+            # need to process depends on colour space
+            pixstr += "#" # WANT TO start with 0x?
+            r,g,b = image.getpixel((x, y))
+            grey = r+g+b/3
+            
+            pixstr += hex(r)[2:].zfill(2) # 2 for 8bit
+            pixstr += hex(g)[2:].zfill(2) # 2 for 8bit
+            pixstr += hex(b)[2:].zfill(2) # 2 for 8bit
+            pixstr += ","
 
-def get_pixel_text_color(pixel_val):
-    return "white" if pixel_val > 128 else "black"
+    return pixstr
 
 
 # Function to update the image when drawing
@@ -33,16 +45,14 @@ def paint(event):
     x_st = x_grid * (PIXEL_SIZE + LINE_WIDTH)
     y_st = y_grid * (PIXEL_SIZE + LINE_WIDTH)
     canvas.create_rectangle(x_st, y_st, x_st + PIXEL_SIZE, y_st + PIXEL_SIZE, fill="black", width=0)
-
-    pixel_value = get_pixel_value(x_grid, y_grid)
-    colour = get_pixel_text_color(pixel_value)
-    canvas.create_text(x_st+PIXEL_SIZE//2, y_st+PIXEL_SIZE//2, text = f"{hex(pixel_value//16)}", fill=colour, font=(f'Helvetica {PIXEL_SIZE//3}'))
-    
+   
     update_pixel_value(x_grid, y_grid)
+    etr_output.delete("0", "end")
+    etr_output.insert("end",get_pixel_values())
 
 # Function to update the displayed pixel value
 def update_pixel_value(x, y):
-    pixel_value = get_pixel_value(x, y)
+    pixel_value = image.getpixel((x, y))
     pixel_value_label.config(text=f"Pixel value: {pixel_value}")
 
 def calc_canvas_size(x_res, y_res):
@@ -59,14 +69,12 @@ def update_canvas(canvas, x_res, y_res):
         canvas.create_line([(line, 0), (line, c_height)],fill='grey', tags='grid_line_w')
     for line in range(PIXEL_SIZE, c_height, PIXEL_SIZE+LINE_WIDTH):
         canvas.create_line([(0, line), (c_width, line)],fill='grey', tags='grid_line_h')
-    # draw colour
-    for pos_x in range(PIXEL_SIZE//2, c_width, PIXEL_SIZE+LINE_WIDTH):
-        for pos_y in range(+PIXEL_SIZE//2, c_height, PIXEL_SIZE+LINE_WIDTH):
-            x_grid = pos_x // (PIXEL_SIZE + LINE_WIDTH)
-            y_grid = pos_y // (PIXEL_SIZE + LINE_WIDTH)
-            pixel_value = get_pixel_value(x_grid, y_grid)
-            colour = get_pixel_text_color(pixel_value)
-            canvas.create_text(pos_x, pos_y, text = f"{hex(pixel_value//16)}", fill=colour, font=(f'Helvetica {PIXEL_SIZE//3}'))    
+
+def colour_sel():
+#    selection = "You selected the option " + str(var.get())
+#    label.config(text = selection)
+   pass
+
 
 # Row0 - Menu & Buttons
 btn_create = tk.Button(root, text="Canvas \u21BB")
@@ -78,29 +86,54 @@ btn_import.grid(row=0, column=1)
 btn_export = tk.Button(root, text="Export")
 btn_export.grid(row=0, column=2)
 
-btn_connect = tk.Button(root, text="Connect")
-btn_connect.grid(row=0, column=4)
-btn_disconnect = tk.Button(root, text="Disconnect")
-btn_disconnect.grid(row=0, column=5)
+combo_com = ttk.Combobox(root, values=["test1","test2"])
+combo_com.grid(row=0, column=3)
 
-# Row1 - Resolution X
+combo_baud = ttk.Combobox(root, values=["9600","57600"])
+combo_baud.grid(row=0, column=4)
+
+btn_connect = tk.Button(root, text="Connect")
+btn_connect.grid(row=0, column=5)
+
+# Row1 - Resolution X/Y
 lbl_res_x = tk.Label(root, text="res_x",)
 lbl_res_x.grid(row=1, column=0)
 etr_res_x = tk.Entry(root)
 etr_res_x.insert("end", f"{X_RES}")
 etr_res_x.grid(row=1, column=1)
-# Row2 - Resolution Y
 lbl_res_y = tk.Label(root, text="res_y")
-lbl_res_y.grid(row=2, column=0)
+lbl_res_y.grid(row=1, column=3)
 etr_res_y = tk.Entry(root)
 etr_res_y.insert("end", f"{Y_RES}")
-etr_res_y.grid(row=2, column=1)
+etr_res_y.grid(row=1, column=4)
+
+# Row2 - CANVAS option
+frm_colour = tk.Frame(root)
+frm_colour.grid(row=2, column=0, columnspan=4)
+colour_var = tk.IntVar()
+rad_colour_grey = tk.Radiobutton(frm_colour, text="GREY", variable=colour_var, value=1, command=colour_sel)
+rad_colour_grey.grid(row=0, column=0)
+rad_colour_rgb = tk.Radiobutton(frm_colour, text="RGB", variable=colour_var, value=2, command=colour_sel)
+rad_colour_rgb.grid(row=0, column=1)
+rad_colour_red = tk.Radiobutton(frm_colour, text="Red", variable=colour_var, value=3, command=colour_sel)
+rad_colour_red.grid(row=0, column=2)
+rad_colour_green = tk.Radiobutton(frm_colour, text="Green", variable=colour_var, value=4, command=colour_sel)
+rad_colour_green.grid(row=0, column=3)
+rad_colour_blue = tk.Radiobutton(frm_colour, text="Blue", variable=colour_var, value=5, command=colour_sel)
+rad_colour_blue.grid(row=0, column=4)
+rad_colour_rgb.select()
+
+combo_colour_depth = ttk.Combobox(root, values=["4bit","8bit"])
+combo_colour_depth.grid(row=0, column=5)
+
+
 
 # Row3 - output
 # Create a label to display pixel values
-etr_output = tk.Entry(root)
-etr_output.insert("end", "org:(0,0), grid:(0,0)")
+etr_output = tk.Entry(root, width=X_RES*3, height=10)
+etr_output.insert("end",get_pixel_values())
 etr_output.grid(row=3, column=0, columnspan=5)
+get_pixel_values()
 
 # Row4 - canvas
 # Create a canvas to draw on
@@ -116,9 +149,6 @@ for line in range(PIXEL_SIZE, c_height, PIXEL_SIZE+LINE_WIDTH):
         for pos_y in range(+PIXEL_SIZE//2, c_height, PIXEL_SIZE+LINE_WIDTH):
             x_grid = pos_x // (PIXEL_SIZE + LINE_WIDTH)
             y_grid = pos_y // (PIXEL_SIZE + LINE_WIDTH)
-            pixel_value = get_pixel_value(x_grid, y_grid)
-            colour = get_pixel_text_color(pixel_value)
-            canvas.create_text(pos_x, pos_y, text = f"{hex(pixel_value//16)}", fill=colour, font=(f'Helvetica {PIXEL_SIZE//3}'))    
 
 canvas.grid(row=4, column=0, columnspan=5)
 
@@ -127,7 +157,7 @@ canvas.bind("<B1-Motion>", paint)
 
 # Row5 - log
 etr_log = tk.Entry(root)
-etr_log.insert("end", "hello log vim is awesome")
+etr_log.insert("end", "org:(0,0), grid:(0,0)")
 etr_log.grid(row=5, column=0, columnspan=5)
 
 # Row6 read pixel value test
@@ -139,8 +169,8 @@ pixel_value_label.grid(row=6, column=0, columnspan=5)
 def motion(event):
     x_grid = event.x // (PIXEL_SIZE + LINE_WIDTH)
     y_grid = event.y // (PIXEL_SIZE + LINE_WIDTH)
-    etr_output.delete("0", "end")
-    etr_output.insert("end", f"org:({event.x},{event.y}), grid:({x_grid},{y_grid})")
+    etr_log.delete("0", "end")
+    etr_log.insert("end", f"org:({event.x},{event.y}), grid:({x_grid},{y_grid})")
 
     # pixel_value_label.config(text=f"org:({event.x},{event.y}), grid:({x_grid},{y_grid})")
     # x, y = event.x, event.y
