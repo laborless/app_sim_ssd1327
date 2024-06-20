@@ -2,11 +2,15 @@ import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk, ImageDraw
 
+import serial
+import serial.tools.list_ports
+
 # Constants
 PIXEL_SIZE = 25 # 4
 LINE_WIDTH = 1
 X_RES = 20 # 128
 Y_RES = 20 # 128
+
 
 # Initialize the main application window
 root = tk.Tk()
@@ -75,6 +79,12 @@ def colour_sel():
 #    label.config(text = selection)
    pass
 
+def serial_connect():
+    ser = serial.Serial('/dev/ttyS1', 19200, timeout=1)
+    ser.write(b'Hello World\r\n')
+    ser.read_all()
+    ser.close()
+    print("connect/disconnect")
 
 # Row0 - Menu & Buttons
 btn_create = tk.Button(root, text="Canvas \u21BB")
@@ -86,8 +96,10 @@ btn_import.grid(row=0, column=1)
 btn_export = tk.Button(root, text="Export")
 btn_export.grid(row=0, column=2)
 
-combo_com = ttk.Combobox(root, values=["test1","test2"])
+comports = list(serial.tools.list_ports.comports(include_links=True))
+combo_com = ttk.Combobox(root, values=comports)
 combo_com.grid(row=0, column=3)
+
 
 combo_baud = ttk.Combobox(root, values=["9600","57600"])
 combo_baud.grid(row=0, column=4)
@@ -123,14 +135,13 @@ rad_colour_blue = tk.Radiobutton(frm_colour, text="Blue", variable=colour_var, v
 rad_colour_blue.grid(row=0, column=4)
 rad_colour_rgb.select()
 
-combo_colour_depth = ttk.Combobox(root, values=["4bit","8bit"])
+combo_colour_depth = ttk.Combobox(frm_colour, values=["4bit","8bit"])
 combo_colour_depth.grid(row=0, column=5)
-
 
 
 # Row3 - output
 # Create a label to display pixel values
-etr_output = tk.Entry(root, width=X_RES*3, height=10)
+etr_output = tk.Entry(root, width=X_RES*3)
 etr_output.insert("end",get_pixel_values())
 etr_output.grid(row=3, column=0, columnspan=5)
 get_pixel_values()
