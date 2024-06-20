@@ -69,7 +69,7 @@ def update_canvas(canvas, x_res, y_res):
             canvas.create_text(pos_x, pos_y, text = f"{hex(pixel_value//16)}", fill=colour, font=(f'Helvetica {PIXEL_SIZE//3}'))    
 
 # Row0 - Menu & Buttons
-btn_create = tk.Button(root, text="Create")
+btn_create = tk.Button(root, text="Canvas \u21BB")
 btn_create.grid(row=0, column=0)
 
 btn_import = tk.Button(root, text="Import")
