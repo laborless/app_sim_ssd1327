@@ -15,6 +15,13 @@ root.title("Python Paint App")
 image = Image.new("L", (X_RES, Y_RES), "white")
 image_draw = ImageDraw.Draw(image)
 
+def get_pixel_value(x, y):
+    return 255 - image.getpixel((x, y))
+
+def get_pixel_text_color(pixel_val):
+    return "white" if pixel_val > 128 else "black"
+
+
 # Function to update the image when drawing
 def paint(event):
     # to do brush color
@@ -27,15 +34,15 @@ def paint(event):
     y_st = y_grid * (PIXEL_SIZE + LINE_WIDTH)
     canvas.create_rectangle(x_st, y_st, x_st + PIXEL_SIZE, y_st + PIXEL_SIZE, fill="black", width=0)
 
-    pixel_value = image.getpixel((x_grid, y_grid))
-    colour = "black" if pixel_value > 128 else "white"
+    pixel_value = get_pixel_value(x_grid, y_grid)
+    colour = get_pixel_text_color(pixel_value)
     canvas.create_text(x_st+PIXEL_SIZE//2, y_st+PIXEL_SIZE//2, text = f"{hex(pixel_value//16)}", fill=colour, font=(f'Helvetica {PIXEL_SIZE//3}'))
     
     update_pixel_value(x_grid, y_grid)
 
 # Function to update the displayed pixel value
 def update_pixel_value(x, y):
-    pixel_value = image.getpixel((x, y))
+    pixel_value = get_pixel_value(x, y)
     pixel_value_label.config(text=f"Pixel value: {pixel_value}")
 
 def calc_canvas_size(x_res, y_res):
@@ -57,8 +64,8 @@ def update_canvas(canvas, x_res, y_res):
         for pos_y in range(+PIXEL_SIZE//2, c_height, PIXEL_SIZE+LINE_WIDTH):
             x_grid = pos_x // (PIXEL_SIZE + LINE_WIDTH)
             y_grid = pos_y // (PIXEL_SIZE + LINE_WIDTH)
-            pixel_value = image.getpixel((x_grid, y_grid))
-            colour = "black" if pixel_value > 128 else "white"
+            pixel_value = get_pixel_value(x_grid, y_grid)
+            colour = get_pixel_text_color(pixel_value)
             canvas.create_text(pos_x, pos_y, text = f"{hex(pixel_value//16)}", fill=colour, font=(f'Helvetica {PIXEL_SIZE//3}'))    
 
 # Row0 - Menu & Buttons
@@ -109,8 +116,8 @@ for line in range(PIXEL_SIZE, c_height, PIXEL_SIZE+LINE_WIDTH):
         for pos_y in range(+PIXEL_SIZE//2, c_height, PIXEL_SIZE+LINE_WIDTH):
             x_grid = pos_x // (PIXEL_SIZE + LINE_WIDTH)
             y_grid = pos_y // (PIXEL_SIZE + LINE_WIDTH)
-            pixel_value = image.getpixel((x_grid, y_grid))
-            colour = "black" if pixel_value > 128 else "white"
+            pixel_value = get_pixel_value(x_grid, y_grid)
+            colour = get_pixel_text_color(pixel_value)
             canvas.create_text(pos_x, pos_y, text = f"{hex(pixel_value//16)}", fill=colour, font=(f'Helvetica {PIXEL_SIZE//3}'))    
 
 canvas.grid(row=4, column=0, columnspan=5)
