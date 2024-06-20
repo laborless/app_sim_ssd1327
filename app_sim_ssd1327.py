@@ -120,7 +120,7 @@ canvas.bind("<B1-Motion>", paint)
 
 # Row5 - log
 etr_log = tk.Entry(root)
-etr_log.insert("end", "hello log diablo is boring")
+etr_log.insert("end", "hello log vim is awesome")
 etr_log.grid(row=5, column=0, columnspan=5)
 
 # Row6 read pixel value test
