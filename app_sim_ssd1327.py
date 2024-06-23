@@ -21,18 +21,36 @@ image = Image.new("RGB", (X_RES, Y_RES), "white")
 image_draw = ImageDraw.Draw(image)
 
 def get_pixel_values():
+    color_space = colour_var.get()
     pixstr = ""
+    is4bit = combo_colour_depth.current() is 0
+    if is4bit:
+        nNibles = 1
+        divRes = 16
+    else:
+        nNibles = 2
+        divRes = 1
     width, height = image.size
+    
     for y in range(height):
         for x in range(width):
             # need to process depends on colour space
             pixstr += "#" # WANT TO start with 0x?
             r,g,b = image.getpixel((x, y))
-            grey = r+g+b/3
+            r = r // divRes
+            g = g // divRes
+            b = b // divRes
+            if color_space == 0:
+                grey = (r+g+b)//3
+                pixstr += hex(grey)[2:].zfill(nNibles) # 2 for 8bit
+            else :
+                if color_space & 1 :
+                    pixstr += hex(r)[2:].zfill(nNibles) # 2 for 8bit
+                if color_space & 2 :
+                    pixstr += hex(g)[2:].zfill(nNibles) # 2 for 8bit
+                if color_space & 4 :
+                    pixstr += hex(b)[2:].zfill(nNibles) # 2 for 8bit
             
-            pixstr += hex(r)[2:].zfill(2) # 2 for 8bit
-            pixstr += hex(g)[2:].zfill(2) # 2 for 8bit
-            pixstr += hex(b)[2:].zfill(2) # 2 for 8bit
             pixstr += ","
 
     return pixstr
@@ -123,28 +141,27 @@ etr_res_y.grid(row=1, column=4)
 frm_colour = tk.Frame(root)
 frm_colour.grid(row=2, column=0, columnspan=4)
 colour_var = tk.IntVar()
-rad_colour_grey = tk.Radiobutton(frm_colour, text="GREY", variable=colour_var, value=1, command=colour_sel)
+rad_colour_grey = tk.Radiobutton(frm_colour, text="GREY", variable=colour_var, value=0, command=colour_sel)
 rad_colour_grey.grid(row=0, column=0)
-rad_colour_rgb = tk.Radiobutton(frm_colour, text="RGB", variable=colour_var, value=2, command=colour_sel)
+rad_colour_rgb = tk.Radiobutton(frm_colour, text="RGB", variable=colour_var, value=7, command=colour_sel)
 rad_colour_rgb.grid(row=0, column=1)
-rad_colour_red = tk.Radiobutton(frm_colour, text="Red", variable=colour_var, value=3, command=colour_sel)
+rad_colour_red = tk.Radiobutton(frm_colour, text="Red", variable=colour_var, value=1, command=colour_sel)
 rad_colour_red.grid(row=0, column=2)
-rad_colour_green = tk.Radiobutton(frm_colour, text="Green", variable=colour_var, value=4, command=colour_sel)
+rad_colour_green = tk.Radiobutton(frm_colour, text="Green", variable=colour_var, value=2, command=colour_sel)
 rad_colour_green.grid(row=0, column=3)
-rad_colour_blue = tk.Radiobutton(frm_colour, text="Blue", variable=colour_var, value=5, command=colour_sel)
+rad_colour_blue = tk.Radiobutton(frm_colour, text="Blue", variable=colour_var, value=4, command=colour_sel)
 rad_colour_blue.grid(row=0, column=4)
-rad_colour_rgb.select()
+rad_colour_grey.select()
 
 combo_colour_depth = ttk.Combobox(frm_colour, values=["4bit","8bit"])
 combo_colour_depth.grid(row=0, column=5)
-
-
+combo_colour_depth.current(0)
+   
 # Row3 - output
 # Create a label to display pixel values
 etr_output = tk.Entry(root, width=X_RES*3)
 etr_output.insert("end",get_pixel_values())
 etr_output.grid(row=3, column=0, columnspan=5)
-get_pixel_values()
 
 # Row4 - canvas
 # Create a canvas to draw on
