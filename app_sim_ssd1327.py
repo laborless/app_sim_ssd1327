@@ -89,8 +89,13 @@ def serial_connect():
     ser.close()
     print("connect/disconnect")
 
+def onCreate():
+    X_RES = int(etr_res_x.get())
+    Y_RES = int(etr_res_y.get())
+    mycanvas.update(X_RES, Y_RES)
+
 # Row0 - Menu & Buttons
-btn_create = tk.Button(root, text="Canvas \u21BB")
+btn_create = tk.Button(root, text="Canvas \u21BB", command=onCreate)
 btn_create.grid(row=0, column=0)
 
 btn_import = tk.Button(root, text="Import")
