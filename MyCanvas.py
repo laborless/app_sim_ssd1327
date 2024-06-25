@@ -13,7 +13,7 @@ class MyCanvas:
     _x_res = 20
     _y_res = 20
 
-    _color_depth = 0    #0: 4bit, else:
+    __color_depth__ = __COLOR_DEPTH_4_    #0: 4bit, else:
 
     @property
     def Resolution(self):
@@ -25,14 +25,14 @@ class MyCanvas:
     
     @property
     def color_depth(self):
-        return self._color_depth
+        return self.__color_depth__
 
     @color_depth.setter
     def color_depth(self, val):
         if val > 0:
-            self.color_depth = MyCanvas.__COLOR_DEPTH_8_
+            self.__color_depth__ = MyCanvas.__COLOR_DEPTH_8_
         else:
-            self.color_depth = MyCanvas.__COLOR_DEPTH_4_
+            self.__color_depth__ = MyCanvas.__COLOR_DEPTH_4_
 
     # image = Image.new("RGB", (_x_res, _y_res), "white")
     # image_draw = ImageDraw.Draw(image)
@@ -110,7 +110,7 @@ class MyCanvas:
         colour_var = tkint.IntVar()
         color_space = colour_var.get()
         pixstr = ""
-        is4bit = self.color_depth is MyCanvas.__COLOR_DEPTH_4_
+        is4bit = self.__color_depth__ is MyCanvas.__COLOR_DEPTH_4_
         if is4bit:
             nNibles = 1
             divRes = 16

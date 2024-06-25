@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk, ImageDraw
 
+from tkinter import messagebox as mb
 import MyCanvas
 
 import serial
@@ -20,42 +21,6 @@ root.title("Python Paint App")
 
 mycanvas = MyCanvas.MyCanvas(root, X_RES, Y_RES)
 
-def get_pixel_values():
-    color_space = colour_var.get()
-    pixstr = ""
-    is4bit = combo_colour_depth.current() is 0
-    if is4bit:
-        nNibles = 1
-        divRes = 16
-    else:
-        nNibles = 2
-        divRes = 1
-    width, height = mycanvas.Resolution
-    
-    for y in range(height):
-        for x in range(width):
-            # need to process depends on colour space
-            pixstr += "#" # WANT TO start with 0x?
-            r,g,b = mycanvas.grid2pixel(x, y)
-            r = r // divRes
-            g = g // divRes
-            b = b // divRes
-            if color_space == 0:
-                grey = (r+g+b)//3
-                pixstr += hex(grey)[2:].zfill(nNibles) # 2 for 8bit
-            else :
-                if color_space & 1 :
-                    pixstr += hex(r)[2:].zfill(nNibles) # 2 for 8bit
-                if color_space & 2 :
-                    pixstr += hex(g)[2:].zfill(nNibles) # 2 for 8bit
-                if color_space & 4 :
-                    pixstr += hex(b)[2:].zfill(nNibles) # 2 for 8bit
-            
-            pixstr += ","
-
-    return pixstr
-
-
 # Function to update the image when drawing
 def paint(event):
     # to do brush color
@@ -64,7 +29,7 @@ def paint(event):
 
     update_pixel_value(x_grid, y_grid)
     etr_output.delete("0", "end")
-    etr_output.insert("end",get_pixel_values())
+    etr_output.insert("end",mycanvas.getPixelValues())
 
 # Function to update the displayed pixel value
 def update_pixel_value(x, y):
@@ -87,6 +52,13 @@ def onCreate():
     X_RES = int(etr_res_x.get())
     Y_RES = int(etr_res_y.get())
     mycanvas.update(X_RES, Y_RES)
+
+def onColorDepthChanged(event):
+    is4bit = combo_colour_depth.current() is 0
+    if is4bit:
+        mycanvas.color_depth = 0
+    else:
+        mycanvas.color_depth = 1
 
 # Row0 - Menu & Buttons
 btn_create = tk.Button(root, text="Canvas \u21BB", command=onCreate)
@@ -137,14 +109,15 @@ rad_colour_blue = tk.Radiobutton(frm_colour, text="Blue", variable=colour_var, v
 rad_colour_blue.grid(row=0, column=4)
 rad_colour_grey.select()
 
-combo_colour_depth = ttk.Combobox(frm_colour, values=["4bit","8bit"])
+combo_colour_depth = ttk.Combobox(frm_colour, values=["4bit","8bit"], state="readonly")
+combo_colour_depth.bind("<<ComboboxSelected>>", onColorDepthChanged)   
 combo_colour_depth.grid(row=0, column=5)
 combo_colour_depth.current(0)
-   
+
 # Row3 - output
 # Create a label to display pixel values
 etr_output = tk.Entry(root, width=X_RES*3)
-etr_output.insert("end",get_pixel_values())
+etr_output.insert("end",mycanvas.getPixelValues())
 etr_output.grid(row=3, column=0, columnspan=5)
 
 # Row4 - canvas
