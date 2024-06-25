@@ -123,10 +123,8 @@ def paint_display(event):
 		output_color_string()
 		
 def test(event):
-	print("button_new clicked")
 	# TODO:
 	# 1. read resolution as integer and hadling
-	# 2. how to detect button down & up ?
 	appUi.new_image()
 	appUi.render_display()
 	output_color_string()
@@ -138,6 +136,6 @@ if __name__ == "__main__":
 	# implementation Fcn
 	appUi.canvas.bind("<B1-Motion>", paint_display)
 	appUi.canvas.bind('<Motion>', hover_display)
-	appUi.button_new.bind("<Button-1>", test)
+	appUi.button_new.bind("<ButtonRelease-1>", test)
 
 	appUi.run()
