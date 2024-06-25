@@ -6,7 +6,7 @@ from pathlib import Path
 
 # from tkinter import *
 # Explicit imports to satisfy Flake8
-from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage
+from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, StringVar, IntVar
 from PIL import Image, ImageTk, ImageDraw
 
 APP_WIDTH = 800
@@ -35,7 +35,9 @@ class AppUI():
 		self.disp_width = self.disp_pixel[0] * self.disp_resolution[0] + DISLAY_LINE_WIDTH * (self.disp_resolution[0] + 1)
 		self.disp_height = self.disp_pixel[1] * self.disp_resolution[1] + DISLAY_LINE_WIDTH * (self.disp_resolution[1] + 1)
 		self.disp_offset = (0, 0)
+		self.disp_limit = ((DISPLAY_WIDTH-DISLAY_LINE_WIDTH)//(1+DISLAY_LINE_WIDTH), (DISPLAY_HEIGHT-DISLAY_LINE_WIDTH)//(1+DISLAY_LINE_WIDTH))
 		self.brush_color = "black"
+		
 
 		self.image = Image.new("RGB", self.disp_resolution, "white")
 		self.image_draw = ImageDraw.Draw(self.image)
@@ -77,7 +79,9 @@ class AppUI():
     	134.0,
     	image=self.entry_image_1
 		)
+		self.entry_res_x_var = IntVar()
 		self.entry_res_x = Entry(
+			textvariable=self.entry_res_x_var,
 			bd=0,
 			bg="#FFFFFF",
 			fg="#000716",
@@ -89,7 +93,7 @@ class AppUI():
 			width=64.0,
 			height=18.0
 		)
-		self.entry_res_x.insert("0", str(self.disp_resolution[0]))
+		self.entry_res_x_var.set(self.disp_resolution[0])
 
 		self.entry_image_2 = PhotoImage(
 			file=relative_to_assets("entry_2.png"))
@@ -98,7 +102,9 @@ class AppUI():
 			134.0,
 			image=self.entry_image_2
 		)
+		self.entry_res_y_var = IntVar()
 		self.entry_res_y = Entry(
+			textvariable=self.entry_res_y_var,
 			bd=0,
 			bg="#FFFFFF",
 			fg="#000716",
@@ -110,7 +116,7 @@ class AppUI():
 			width=64.0,
 			height=18.0
 		)
-		self.entry_res_y.insert("0", str(self.disp_resolution[1]))
+		self.entry_res_y_var.set(self.disp_resolution[1])
 
 		self.canvas.create_rectangle(
 			25.0,
@@ -237,18 +243,23 @@ class AppUI():
     	35.0,
     	image=entry_image_3
 		)
+		
+		self.entry_coor_var = StringVar()
 		self.entry_coor = Entry(
+		textvariable=self.entry_coor_var,
     	bd=0,
     	bg="#FFFFFF",
     	fg="#000716",
     	highlightthickness=0
 		)
+		
 		self.entry_coor.place(
 	    x=213.0,
     	y=25.0,
     	width=114.0,
     	height=18.0
 		)
+		
 
 		self.canvas.create_text(
     	210.0,
@@ -262,11 +273,14 @@ class AppUI():
 		entry_image_4 = PhotoImage(
     	file=relative_to_assets("entry_4.png"))
 		self.entry_bg_4 = self.canvas.create_image(
-  	  400.0,
-	    35.0,
+			400.0,
+			35.0,
     	image=entry_image_4
 		)
+
+		self.entry_color_var = StringVar()
 		self.entry_color = Entry(
+			textvariable=self.entry_color_var,
 	    bd=0,
     	bg="#FFFFFF",
     	fg="#000716",

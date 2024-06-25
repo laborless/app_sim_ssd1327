@@ -1,4 +1,5 @@
 import AppUI
+from tkinter import messagebox
 
 def get_pixel_value_string():
 	# color_space = colour_var.get()
@@ -90,10 +91,8 @@ def hover_display(event):
 		pixstr += hex(g)[2:].zfill(nNibles) # 2 for 8bit
 		pixstr += hex(b)[2:].zfill(nNibles) # 2 for 8bit
 		# update position info.
-		appUi.entry_color.delete("0", "end")
-		appUi.entry_color.insert("0", pixstr)
-		appUi.entry_coor.delete("0", "end")
-		appUi.entry_coor.insert("0", f"({grid_x},{grid_y})")
+		appUi.entry_color_var.set(pixstr)
+		appUi.entry_coor_var.set(f"({grid_x},{grid_y})")
 
 def paint_display(event):
 	color = appUi.get_brush_color()
@@ -124,10 +123,19 @@ def paint_display(event):
 		
 def test(event):
 	# TODO:
-	# 1. read resolution as integer and hadling
-	appUi.new_image()
-	appUi.render_display()
-	output_color_string()
+	# 1. ask to export?
+	try:
+		res = (appUi.entry_res_x_var.get(), appUi.entry_res_y_var.get())
+		if res[0] > 0 and res[0] <= appUi.disp_limit[0] and res[1] > 0 and res[1] <= appUi.disp_limit[1]:
+			appUi.disp_resolution = res
+			appUi.new_image()
+			appUi.render_display()
+			output_color_string()
+		else:
+			messagebox.showerror(title="Error", message=f"resolution! out of range({appUi.disp_limit[0]},{appUi.disp_limit[1]})")
+	except Exception as e:
+		messagebox.showerror(title="Error", message="Please verify resolution!")
+
 
 if __name__ == "__main__":
 	# load ui
@@ -137,5 +145,9 @@ if __name__ == "__main__":
 	appUi.canvas.bind("<B1-Motion>", paint_display)
 	appUi.canvas.bind('<Motion>', hover_display)
 	appUi.button_new.bind("<ButtonRelease-1>", test)
+	
+
+	appUi.entry_coor.configure(state="readonly", readonlybackground="white")
+	appUi.entry_color.configure(state="readonly", readonlybackground="white")
 
 	appUi.run()
