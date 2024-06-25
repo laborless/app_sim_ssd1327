@@ -138,15 +138,15 @@ class AppUI():
 
 		self.button_image_1 = PhotoImage(
 			file=relative_to_assets("button_1.png"))
-		self.button_1 = Button(
+		self.button_new = Button(
 			image=self.button_image_1,
 			borderwidth=0,
 			highlightthickness=0,
-			command=lambda: print("button_1 clicked"),
+			# command=lambda: print("button_1 clicked"),
 			relief="flat",
 			fg="#1278EC"
 		)
-		self.button_1.place(
+		self.button_new.place(
 			x=25.0,
 			y=60.0,
 			width=150.0,
@@ -402,6 +402,11 @@ class AppUI():
     	width=580.0,
     	height=88.0
 		)
+
+	def new_image(self):
+		self.image.close()
+		self.image = Image.new("RGB", self.disp_resolution, "white")
+		self.image_draw = ImageDraw.Draw(self.image)
 
 	def render_display(self):
 		pix_width = 1
