@@ -4,11 +4,35 @@ from tkinter import ttk
 from PIL import Image, ImageTk, ImageDraw
 
 class MyCanvas:
+    __COLOR_DEPTH_4_ = 0
+    __COLOR_DEPTH_8_ = 1
+
     pixel_size = 25
     line_width = 1
 
     _x_res = 20
     _y_res = 20
+
+    _color_depth = 0    #0: 4bit, else:
+
+    @property
+    def Resolution(self):
+        return (self._x_res, self._y_res)
+
+    @property
+    def Canvas(self):
+        return self.canvas
+    
+    @property
+    def color_depth(self):
+        return self._color_depth
+
+    @color_depth.setter
+    def color_depth(self, val):
+        if val > 0:
+            self.color_depth = MyCanvas.__COLOR_DEPTH_8_
+        else:
+            self.color_depth = MyCanvas.__COLOR_DEPTH_4_
 
     # image = Image.new("RGB", (_x_res, _y_res), "white")
     # image_draw = ImageDraw.Draw(image)
@@ -50,21 +74,72 @@ class MyCanvas:
 
         self.__refresh_grid__()
         self.__refresh_image__()
+    
+    # @param x mouse x position
+    # @param y mouse y position
+    def point2pixel(self, px, py):
+        x, y = self.point2grid(px, py)
 
-    # temporary use only
-    # todo:
-    # create paint private method to update automatically on mouse events
-    def getCanvas(self):
-        return self.canvas
+        return self.grid2pixel(x, y)
 
-    # temporary use only
-    # todo:
-    # create paint private method to update automatically on mouse events
-    def getImage(self):
-        return self.image
+    def point2grid(self, px, py):
+        x_grid = px // (self.pixel_size + self.line_width)
+        y_grid = py // (self.pixel_size + self.line_width)
 
-    # temporary use only
-    # todo:
-    # create paint private method to update automatically on mouse events
-    def getImageDraw(self):
-        return self.image_draw
+        return (x_grid, y_grid)
+
+    def grid2pixel(self, grid_x, grid_y):
+        return self.image.getpixel((grid_x, grid_y))
+    
+    def paintPoint(self, px, py, color: str):
+        x_grid, y_grid = self.point2grid(px, py)
+        self.image_draw.point([(x_grid, y_grid)], fill=color)
+
+        x_st = x_grid * (self.pixel_size + self.line_width)
+        y_st = y_grid * (self.pixel_size + self.line_width)
+        self.canvas.create_rectangle(
+            x_st,
+            y_st,
+            x_st + self.pixel_size,
+            y_st + self.pixel_size,
+            fill=color,
+            width=0
+        )
+    
+    def getPixelValues(self):
+        colour_var = tkint.IntVar()
+        color_space = colour_var.get()
+        pixstr = ""
+        is4bit = self.color_depth is MyCanvas.__COLOR_DEPTH_4_
+        if is4bit:
+            nNibles = 1
+            divRes = 16
+        else:
+            nNibles = 2
+            divRes = 1
+        width, height = self.Resolution
+        
+        for y in range(height):
+            for x in range(width):
+                # need to process depends on colour space
+                pixstr += "#" # WANT TO start with 0x?
+                r,g,b = self.grid2pixel(x, y)
+                r = r // divRes
+                g = g // divRes
+                b = b // divRes
+                if color_space == 0:
+                    grey = (r+g+b)//3
+                    pixstr += hex(grey)[2:].zfill(nNibles) # 2 for 8bit
+                else :
+                    if color_space & 1 :
+                        pixstr += hex(r)[2:].zfill(nNibles) # 2 for 8bit
+                    if color_space & 2 :
+                        pixstr += hex(g)[2:].zfill(nNibles) # 2 for 8bit
+                    if color_space & 4 :
+                        pixstr += hex(b)[2:].zfill(nNibles) # 2 for 8bit
+                
+                pixstr += ","
+
+        return pixstr
+
+  

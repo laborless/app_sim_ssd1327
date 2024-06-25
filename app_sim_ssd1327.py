@@ -30,13 +30,13 @@ def get_pixel_values():
     else:
         nNibles = 2
         divRes = 1
-    width, height = mycanvas.getImage().size
+    width, height = mycanvas.Resolution
     
     for y in range(height):
         for x in range(width):
             # need to process depends on colour space
             pixstr += "#" # WANT TO start with 0x?
-            r,g,b = mycanvas.getImage().getpixel((x, y))
+            r,g,b = mycanvas.grid2pixel(x, y)
             r = r // divRes
             g = g // divRes
             b = b // divRes
@@ -59,22 +59,16 @@ def get_pixel_values():
 # Function to update the image when drawing
 def paint(event):
     # to do brush color
-    x_grid = event.x // (PIXEL_SIZE + LINE_WIDTH)
-    y_grid = event.y // (PIXEL_SIZE + LINE_WIDTH)
-    mycanvas.getImageDraw().point([(x_grid, y_grid)], fill="black")
+    mycanvas.paintPoint(event.x, event.y, "black")
+    x_grid, y_grid = mycanvas.point2grid(event.x, event.y)
 
-
-    x_st = x_grid * (PIXEL_SIZE + LINE_WIDTH)
-    y_st = y_grid * (PIXEL_SIZE + LINE_WIDTH)
-    mycanvas.getCanvas().create_rectangle(x_st, y_st, x_st + PIXEL_SIZE, y_st + PIXEL_SIZE, fill="black", width=0)
-   
     update_pixel_value(x_grid, y_grid)
     etr_output.delete("0", "end")
     etr_output.insert("end",get_pixel_values())
 
 # Function to update the displayed pixel value
 def update_pixel_value(x, y):
-    pixel_value = mycanvas.getImage().getpixel((x, y))
+    pixel_value = mycanvas.grid2pixel(x, y)
     pixel_value_label.config(text=f"Pixel value: {pixel_value}")
 
 def colour_sel():
@@ -158,8 +152,8 @@ etr_output.grid(row=3, column=0, columnspan=5)
 # mycanvas = MyCanvas.MyCanvas(root, X_RES, Y_RES)
 
 # Bind mouse events to the canvas
-mycanvas.getCanvas().bind("<B1-Motion>", paint)
-mycanvas.getCanvas().bind("<Button-1>", paint)
+mycanvas.Canvas.bind("<B1-Motion>", paint)
+mycanvas.Canvas.bind("<Button-1>", paint)
 
 # Row5 - log
 etr_log = tk.Entry(root)
@@ -173,8 +167,7 @@ pixel_value_label.grid(row=6, column=0, columnspan=5)
 
 # Function to track mouse movement and update pixel value display
 def motion(event):
-    x_grid = event.x // (PIXEL_SIZE + LINE_WIDTH)
-    y_grid = event.y // (PIXEL_SIZE + LINE_WIDTH)
+    x_grid, y_grid = mycanvas.point2grid(event.x, event.y)
     etr_log.delete("0", "end")
     etr_log.insert("end", f"org:({event.x},{event.y}), grid:({x_grid},{y_grid})")
 
@@ -185,7 +178,7 @@ def motion(event):
     update_pixel_value(x_grid, y_grid)
 
 # Bind the motion event to the canvas
-mycanvas.getCanvas().bind('<Motion>', motion)
+mycanvas.Canvas.bind('<Motion>', motion)
 
 
 # Run the Tkinter event loop
