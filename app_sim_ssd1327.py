@@ -182,6 +182,7 @@ canvas.grid(row=4, column=0, columnspan=5)
 
 # Bind mouse events to the canvas
 canvas.bind("<B1-Motion>", paint)
+canvas.bind("<Button-1>", paint)
 
 # Row5 - log
 etr_log = tk.Entry(root)
