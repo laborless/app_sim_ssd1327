@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk, ImageDraw
 
+import MyCanvas
+
 import serial
 import serial.tools.list_ports
 
@@ -16,9 +18,7 @@ Y_RES = 20 # 128
 root = tk.Tk()
 root.title("Python Paint App")
 
-# Create a 128x128 white image (8bit grey scale)
-image = Image.new("RGB", (X_RES, Y_RES), "white")
-image_draw = ImageDraw.Draw(image)
+mycanvas = MyCanvas.MyCanvas(root, X_RES, Y_RES)
 
 def get_pixel_values():
     color_space = colour_var.get()
@@ -30,13 +30,13 @@ def get_pixel_values():
     else:
         nNibles = 2
         divRes = 1
-    width, height = image.size
+    width, height = mycanvas.getImage().size
     
     for y in range(height):
         for x in range(width):
             # need to process depends on colour space
             pixstr += "#" # WANT TO start with 0x?
-            r,g,b = image.getpixel((x, y))
+            r,g,b = mycanvas.getImage().getpixel((x, y))
             r = r // divRes
             g = g // divRes
             b = b // divRes
@@ -61,12 +61,12 @@ def paint(event):
     # to do brush color
     x_grid = event.x // (PIXEL_SIZE + LINE_WIDTH)
     y_grid = event.y // (PIXEL_SIZE + LINE_WIDTH)
-    image_draw.point([(x_grid, y_grid)], fill="black")
+    mycanvas.getImageDraw().point([(x_grid, y_grid)], fill="black")
 
 
     x_st = x_grid * (PIXEL_SIZE + LINE_WIDTH)
     y_st = y_grid * (PIXEL_SIZE + LINE_WIDTH)
-    canvas.create_rectangle(x_st, y_st, x_st + PIXEL_SIZE, y_st + PIXEL_SIZE, fill="black", width=0)
+    mycanvas.getCanvas().create_rectangle(x_st, y_st, x_st + PIXEL_SIZE, y_st + PIXEL_SIZE, fill="black", width=0)
    
     update_pixel_value(x_grid, y_grid)
     etr_output.delete("0", "end")
@@ -74,23 +74,8 @@ def paint(event):
 
 # Function to update the displayed pixel value
 def update_pixel_value(x, y):
-    pixel_value = image.getpixel((x, y))
+    pixel_value = mycanvas.getImage().getpixel((x, y))
     pixel_value_label.config(text=f"Pixel value: {pixel_value}")
-
-def calc_canvas_size(x_res, y_res):
-    width = x_res * PIXEL_SIZE + (x_res-1) * LINE_WIDTH
-    height = y_res * PIXEL_SIZE + (y_res-1) * LINE_WIDTH
-
-    return (width, height)
-
-def update_canvas(canvas, x_res, y_res):
-    c_width, c_height = calc_canvas_size(x_res, y_res)
-    canvas.config(width=c_width, height=c_height)
-    # draw_grid
-    for line in range(PIXEL_SIZE, c_width, PIXEL_SIZE+LINE_WIDTH):
-        canvas.create_line([(line, 0), (line, c_height)],fill='grey', tags='grid_line_w')
-    for line in range(PIXEL_SIZE, c_height, PIXEL_SIZE+LINE_WIDTH):
-        canvas.create_line([(0, line), (c_width, line)],fill='grey', tags='grid_line_h')
 
 def colour_sel():
 #    selection = "You selected the option " + str(var.get())
@@ -165,24 +150,11 @@ etr_output.grid(row=3, column=0, columnspan=5)
 
 # Row4 - canvas
 # Create a canvas to draw on
-c_width, c_height = calc_canvas_size(X_RES, Y_RES)
-canvas = tk.Canvas(root, width=c_width, height=c_height, bg="white", 
-                   highlightthickness=0, borderwidth=0) # remove border
-for line in range(PIXEL_SIZE, c_width, PIXEL_SIZE+LINE_WIDTH):
-    canvas.create_line([(line, 0), (line, c_height)],fill='grey', tags='grid_line_w')
-for line in range(PIXEL_SIZE, c_height, PIXEL_SIZE+LINE_WIDTH):
-    canvas.create_line([(0, line), (c_width, line)],fill='grey', tags='grid_line_h')
-    # draw colour
-    for pos_x in range(PIXEL_SIZE//2, c_width, PIXEL_SIZE+LINE_WIDTH):
-        for pos_y in range(+PIXEL_SIZE//2, c_height, PIXEL_SIZE+LINE_WIDTH):
-            x_grid = pos_x // (PIXEL_SIZE + LINE_WIDTH)
-            y_grid = pos_y // (PIXEL_SIZE + LINE_WIDTH)
-
-canvas.grid(row=4, column=0, columnspan=5)
+# mycanvas = MyCanvas.MyCanvas(root, X_RES, Y_RES)
 
 # Bind mouse events to the canvas
-canvas.bind("<B1-Motion>", paint)
-canvas.bind("<Button-1>", paint)
+mycanvas.getCanvas().bind("<B1-Motion>", paint)
+mycanvas.getCanvas().bind("<Button-1>", paint)
 
 # Row5 - log
 etr_log = tk.Entry(root)
@@ -208,7 +180,8 @@ def motion(event):
     update_pixel_value(x_grid, y_grid)
 
 # Bind the motion event to the canvas
-canvas.bind('<Motion>', motion)
+mycanvas.getCanvas().bind('<Motion>', motion)
+
 
 # Run the Tkinter event loop
 root.mainloop()
