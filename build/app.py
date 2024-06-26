@@ -148,7 +148,7 @@ def apply_brush_color(strColor):
 	appUi.set_brush_color(strColor)
 
 def choose_brush_color(event):
-	color = colorchooser.askcolor(title="Choose the brush color")
+	color = colorchooser.askcolor(title="Choose the brush color",initialcolor=appUi.get_brush_color())
 	if color[1] is not None:
 		apply_brush_color(color[1])
 
