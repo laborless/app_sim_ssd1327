@@ -1,5 +1,8 @@
 import AppUI
-from tkinter import messagebox
+from tkinter import messagebox,colorchooser,filedialog
+from PIL import ImageColor
+import serial.tools.list_ports
+
 
 def get_pixel_value_string():
 	# color_space = colour_var.get()
@@ -137,6 +140,29 @@ def test(event):
 		messagebox.showerror(title="Error", message="Please verify resolution!")
 
 
+def apply_brush_color(strColor):
+	l = ImageColor.getcolor(strColor, "L")
+	fg_color = "black" if l > 128 else "white"
+	appUi.entry_brush_var.set(strColor)
+	appUi.entry_brush.configure(state="readonly", fg=fg_color, readonlybackground=strColor)
+	appUi.set_brush_color(strColor)
+
+def choose_brush_color(event):
+	color = colorchooser.askcolor(title="Choose the brush color")
+	if color[1] is not None:
+		apply_brush_color(color[1])
+
+
+def import_file(event):
+	path = filedialog.askopenfile(title='Import')
+	if path:
+		print(path)
+
+def export_file(event):
+	path = filedialog.askopenfile(mode='w+', title='Export')
+	if path:
+		print(path)
+
 if __name__ == "__main__":
 	# load ui
 	appUi = AppUI.AppUI()
@@ -145,9 +171,36 @@ if __name__ == "__main__":
 	appUi.canvas.bind("<B1-Motion>", paint_display)
 	appUi.canvas.bind('<Motion>', hover_display)
 	appUi.button_new.bind("<ButtonRelease-1>", test)
-	
 
 	appUi.entry_coor.configure(state="readonly", readonlybackground="white")
 	appUi.entry_color.configure(state="readonly", readonlybackground="white")
+
+	# button import
+	appUi.button_import.bind("<ButtonRelease-1>", import_file)
+	# button export
+	appUi.button_export.bind("<ButtonRelease-1>", export_file)
+
+	# Brush color
+	appUi.entry_brush.bind("<Button>", choose_brush_color)
+	apply_brush_color(appUi.get_brush_color())
+
+	# Color Space
+	appUi.combo_colorspace.configure(
+			values=["RGB","Red","Green","Blue","Grey"], state="readonly") # background color?
+	appUi.combo_colorspace.current(0)
+
+	# Color Depth"
+	appUi.combo_colordepth.configure(values=["8bits","4bits"], state="readonly") # background color?
+	appUi.combo_colordepth.current(0)
+
+	# Com Port
+	comports = list(serial.tools.list_ports.comports(include_links=True))
+	appUi.combo_ser_port.configure(values=comports)
+	appUi.combo_ser_port.current(0)
+
+	# BaudRate
+	baud = ['4800','9600','19200','38400','57600','115200','230400','460800','921600']
+	appUi.combo_ser_baudrate.configure(values=baud)
+	appUi.combo_ser_baudrate.current(0)
 
 	appUi.run()

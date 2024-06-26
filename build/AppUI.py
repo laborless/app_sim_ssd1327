@@ -6,7 +6,8 @@ from pathlib import Path
 
 # from tkinter import *
 # Explicit imports to satisfy Flake8
-from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, StringVar, IntVar
+from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, StringVar, IntVar, ttk
+from tkinter import Checkbutton
 from PIL import Image, ImageTk, ImageDraw
 
 APP_WIDTH = 800
@@ -36,7 +37,7 @@ class AppUI():
 		self.disp_height = self.disp_pixel[1] * self.disp_resolution[1] + DISLAY_LINE_WIDTH * (self.disp_resolution[1] + 1)
 		self.disp_offset = (0, 0)
 		self.disp_limit = ((DISPLAY_WIDTH-DISLAY_LINE_WIDTH)//(1+DISLAY_LINE_WIDTH), (DISPLAY_HEIGHT-DISLAY_LINE_WIDTH)//(1+DISLAY_LINE_WIDTH))
-		self.brush_color = "black"
+		self.brush_color = "#000000"
 		
 
 		self.image = Image.new("RGB", self.disp_resolution, "white")
@@ -102,6 +103,17 @@ class AppUI():
 			134.0,
 			image=self.entry_image_2
 		)
+
+		self.canvas.create_text(
+			98.0,
+			124.0,
+			anchor="nw",
+			text="/",
+			fill="#FFFFFF",
+			font=("Inter", 12 * -1)
+		)
+
+
 		self.entry_res_y_var = IntVar()
 		self.entry_res_y = Entry(
 			textvariable=self.entry_res_y_var,
@@ -118,29 +130,47 @@ class AppUI():
 		)
 		self.entry_res_y_var.set(self.disp_resolution[1])
 
-		self.canvas.create_rectangle(
-			25.0,
-			164.0,
-			175.0,
-			184.0,
-			fill="#FFFFFF",
-			outline="")
+		# color Space
+		self.combo_colorspace = ttk.Combobox()
+		self.combo_colorspace.place(
+			x=25.0,
+			y=164.0,
+			width=150.0,
+			height=20.0
+		)
 
-		self.canvas.create_rectangle(
-			25.0,
-			204.0,
-			121.0,
-			224.0,
-			fill="#FFFFFF",
-			outline="")
+		# Color Depth
+		self.combo_colordepth = ttk.Combobox()
+		self.combo_colordepth.place(
+			x=25.0,
+			y=204.0,
+			width=61.0,
+			height=20.0
+		)
 
+		# nibble remap
 		self.canvas.create_rectangle(
-    	123.0,
+    	88.0,
     	204.0,
     	175.0,
     	224.0,
     	fill="#FFFFFF",
     	outline="")
+		self.canvas.create_text(
+    	91.0,
+    	206.0,
+    	anchor="nw",
+    	text="Nb Remap",
+    	fill="#000000",
+    	font=("Inter", 12 * -1)
+		)
+		self.check_nb_remap = Checkbutton(bg="white")
+		self.check_nb_remap.place(
+			x=153.0,
+			y=204.0,
+			width=20.0,
+			height=20.0,
+		)
 
 		self.button_image_1 = PhotoImage(
 			file=relative_to_assets("button_1.png"))
@@ -161,15 +191,15 @@ class AppUI():
 
 		self.button_image_2 = PhotoImage(
 			file=relative_to_assets("button_2.png"))
-		self.button_2 = Button(
+		self.button_import = Button(
 			image=self.button_image_2,
 			borderwidth=0,
 			highlightthickness=0,
-			command=lambda: print("button_2 clicked"),
+			# command=lambda: print("button_2 clicked"),
 			relief="flat",
 			fg="#1278EC"
 		)
-		self.button_2.place(
+		self.button_import.place(
 			x=25.0,
 			y=246.0,
 			width=150.0,
@@ -178,15 +208,15 @@ class AppUI():
 
 		self.button_image_3 = PhotoImage(
 				file=relative_to_assets("button_3.png"))
-		self.button_3 = Button(
+		self.button_export = Button(
 			image=self.button_image_3,
 			borderwidth=0,
 			highlightthickness=0,
-			command=lambda: print("button_3 clicked"),
+			# command=lambda: print("button_3 clicked"),
 			relief="flat",
 			fg="#1278EC"
 		)
-		self.button_3.place(
+		self.button_export.place(
 			x=25.0,
 			y=296.0,
 			width=150.0,
@@ -320,21 +350,21 @@ class AppUI():
     	font=("Inter", 12 * -1)
 		)
 
-		self.canvas.create_rectangle(
-	    600.0,
-    	25.0,
-    	650.0,
-    	45.0,
-    	fill="#FFFFFF",
-    	outline="")
-
-		self.canvas.create_rectangle(
-	    660.0,
-    	10.0,
-    	695.0,
-    	45.0,
-    	fill="#FFFFFF",
-    	outline="")
+		# Brush
+		self.entry_brush_var = StringVar()
+		self.entry_brush = Entry(
+			textvariable=self.entry_brush_var,
+	    bd=0,
+    	bg="#FFFFFF",
+    	fg="#000716",
+    	highlightthickness=0
+		)
+		self.entry_brush.place(
+    	x=603.0,
+    	y=25.0,
+    	width=114.0,
+    	height=18.0
+		)
 
 		self.canvas.create_text(
     	600.0,
@@ -354,30 +384,23 @@ class AppUI():
     	font=("Inter", 12 * -1)
 		)
 
-		self.canvas.create_text(
-			98.0,
-			124.0,
-			anchor="nw",
-			text="/",
-			fill="#FFFFFF",
-			font=("Inter", 12 * -1)
+		# COM PORT
+		self.combo_ser_port = ttk.Combobox()
+		self.combo_ser_port.place(
+			x=25.0,
+			y=449.0,
+			width=84.0,
+			height=20.0
 		)
 
-		self.canvas.create_rectangle(
-    	25.0,
-    	449.0,
-    	99.0,
-    	469.0,
-    	fill="#FFFFFF",
-    	outline="")
-
-		self.canvas.create_rectangle(
-	    101.0,
-    	449.0,
-    	175.0,
-    	469.0,
-    	fill="#FFFFFF",
-	    outline="")
+		# COM Baudrate
+		self.combo_ser_baudrate = ttk.Combobox()
+		self.combo_ser_baudrate.place(
+			x=111.0,
+			y=449.0,
+			width=64.0,
+			height=20.0
+		)
 
 		self.canvas.create_text(
 	    25.0,
@@ -464,6 +487,9 @@ class AppUI():
 	
 	def get_brush_color(self):
 		return self.brush_color
+	
+	def set_brush_color(self, color):
+		self.brush_color = color
 	
 	def run(self):
 		self._root.resizable(False, False)
