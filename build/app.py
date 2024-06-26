@@ -144,6 +144,7 @@ if __name__ == "__main__":
 	# implementation Fcn
 	appUi.canvas.bind("<B1-Motion>", paint_display)
 	appUi.canvas.bind('<Motion>', hover_display)
+	appUi.canvas.bind('<Button-1>', paint_display)
 	appUi.button_new.bind("<ButtonRelease-1>", test)
 	
 
