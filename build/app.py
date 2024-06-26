@@ -163,6 +163,13 @@ def export_file(event):
 	if path:
 		print(path)
 
+def connect_driver(event):
+	port = appUi.combo_ser_port.get()
+	baud = appUi.combo_ser_baudrate.get()
+	if baud.isnumeric():
+		print(f"connect to {port} in {baud}bps")
+		print(f"connecting...")
+
 if __name__ == "__main__":
 	# load ui
 	appUi = AppUI.AppUI()
@@ -179,6 +186,8 @@ if __name__ == "__main__":
 	appUi.button_import.bind("<ButtonRelease-1>", import_file)
 	# button export
 	appUi.button_export.bind("<ButtonRelease-1>", export_file)
+	# button connect
+	appUi.button_connect.bind("<ButtonRelease-1>", connect_driver)
 
 	# Brush color
 	appUi.entry_brush.bind("<Button>", choose_brush_color)

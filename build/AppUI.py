@@ -225,15 +225,15 @@ class AppUI():
 
 		self.button_image_4 = PhotoImage(
 				file=relative_to_assets("button_4.png"))
-		self.button_4 = Button(
+		self.button_connect = Button(
     	image=self.button_image_4,
     	borderwidth=0,
     	highlightthickness=0,
-    	command=lambda: print("button_4 clicked"),
+    	# command=lambda: print("button_4 clicked"),
     	relief="flat",
 			fg="#1278EC"
 		)
-		self.button_4.place(
+		self.button_connect.place(
     	x=25.0,
     	y=390.0,
     	width=150.0,
