@@ -2,6 +2,7 @@ import AppUI
 from tkinter import messagebox,colorchooser,filedialog
 from PIL import ImageColor
 import serial.tools.list_ports
+import json
 
 
 def get_pixel_value_string():
@@ -154,14 +155,26 @@ def choose_brush_color(event):
 
 
 def import_file(event):
-	path = filedialog.askopenfile(title='Import')
+	path = filedialog.askopenfilename(title='Import')
 	if path:
-		print(path)
+		with open(path, 'r') as f:
+			img = json.load(f)
+			print(img)
 
 def export_file(event):
-	path = filedialog.askopenfile(mode='w+', title='Export')
+	path = filedialog.asksaveasfilename(title='Export')
 	if path:
-		print(path)
+		with open(path, 'w+') as f:
+			img = {}
+			img["width"] = appUi.image.width
+			img["height"] = appUi.image.height
+			img["space"] = appUi.combo_colorspace.get()
+			img["depth"] = appUi.combo_colordepth.get()
+			img["NbRemap"] = appUi.check_nb_remap_var.get()
+			img["image"] = [] # to be implemented
+			json.dump(img, f)
+
+
 
 def connect_driver(event):
 	port = appUi.combo_ser_port.get()

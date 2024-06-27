@@ -164,7 +164,9 @@ class AppUI():
     	fill="#000000",
     	font=("Inter", 12 * -1)
 		)
-		self.check_nb_remap = Checkbutton(bg="white")
+		self.check_nb_remap_var = IntVar()
+		self.check_nb_remap = Checkbutton(
+			bg="white", variable=self.check_nb_remap_var)
 		self.check_nb_remap.place(
 			x=153.0,
 			y=204.0,
