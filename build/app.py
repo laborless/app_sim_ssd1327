@@ -1,6 +1,6 @@
 import AppUI
 from tkinter import messagebox,colorchooser,filedialog
-from PIL import ImageColor
+from PIL import ImageColor, Image
 import serial.tools.list_ports
 import json
 
@@ -140,6 +140,32 @@ def test(event):
 	except Exception as e:
 		messagebox.showerror(title="Error", message="Please verify resolution!")
 
+def re_render_display_test():
+	# Empty grid display
+	appUi.render_display()
+
+	# Draw All Image --> we need this function
+	line_width = appUi.get_display_line_width()
+
+	color = appUi.get_brush_color()
+	
+	disp_pos_x, disp_pos_y = appUi.get_display_offset()
+	
+	disp_pos_x += appUi.disp_offset[0]
+	disp_pos_y += appUi.disp_offset[1]
+
+	for x in range(appUi.disp_resolution[0]):
+		for y in range(appUi.disp_resolution[1]):
+			
+			color = '#%02x%02x%02x' % appUi.image.getpixel((x, y))
+			# drawing
+			x_st = disp_pos_x + line_width + ( x * (appUi.disp_pixel[0] + line_width) )
+			y_st = disp_pos_y + line_width + ( y * (appUi.disp_pixel[1] + line_width) )
+			appUi.canvas.create_rectangle(x_st, y_st, x_st + appUi.disp_pixel[0],
+									y_st + appUi.disp_pixel[1], fill=color, width=0)
+
+	# update output
+	output_color_string()
 
 def apply_brush_color(strColor):
 	l = ImageColor.getcolor(strColor, "L")
@@ -157,9 +183,27 @@ def choose_brush_color(event):
 def import_file(event):
 	path = filedialog.askopenfilename(title='Import')
 	if path:
-		with open(path, 'r') as f:
-			img = json.load(f)
-			print(img)
+		isImage = True
+		try:
+			with Image.open(path) as im:
+				print("format", im.format)
+				im = im.convert('RGB')
+				appUi.image.close()
+				appUi.image = im.resize((appUi.disp_resolution[0], appUi.disp_resolution[1]))
+				re_render_display_test() # to be replaced to good one
+		except:
+			isImage = False
+		
+		if not isImage:
+			try:
+				with open(path, 'r') as f:
+					img = json.load(f)
+					print(img)
+					# TODO: Need to draw image from test color map
+					# re_render_display_test() # to be replaced to good one
+			except:
+				print("bad input")
+				pass
 
 def export_file(event):
 	path = filedialog.asksaveasfilename(title='Export')
@@ -173,7 +217,6 @@ def export_file(event):
 			img["NbRemap"] = appUi.check_nb_remap_var.get()
 			img["image"] = [] # to be implemented
 			json.dump(img, f)
-
 
 
 def connect_driver(event):
