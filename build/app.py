@@ -1,9 +1,5 @@
 import AppUI
-from tkinter import messagebox,colorchooser,filedialog
-from PIL import ImageColor
-import serial.tools.list_ports
-import json
-
+from tkinter import messagebox
 
 
 pixel_string = " "
@@ -219,48 +215,6 @@ def test2(event):
 	# messagebox.showinfo("test2", appUi.entry_output.get("1.0", "end"))
 
 
-def apply_brush_color(strColor):
-	l = ImageColor.getcolor(strColor, "L")
-	fg_color = "black" if l > 128 else "white"
-	appUi.entry_brush_var.set(strColor)
-	appUi.entry_brush.configure(state="readonly", fg=fg_color, readonlybackground=strColor)
-	appUi.set_brush_color(strColor)
-
-def choose_brush_color(event):
-	color = colorchooser.askcolor(title="Choose the brush color",initialcolor=appUi.get_brush_color())
-	if color[1] is not None:
-		apply_brush_color(color[1])
-
-
-def import_file(event):
-	path = filedialog.askopenfilename(title='Import')
-	if path:
-		with open(path, 'r') as f:
-			img = json.load(f)
-			print(img)
-
-def export_file(event):
-	path = filedialog.asksaveasfilename(title='Export')
-	if path:
-		with open(path, 'w+') as f:
-			img = {}
-			img["width"] = appUi.image.width
-			img["height"] = appUi.image.height
-			img["space"] = appUi.combo_colorspace.get()
-			img["depth"] = appUi.combo_colordepth.get()
-			img["NbRemap"] = appUi.check_nb_remap_var.get()
-			img["image"] = [] # to be implemented
-			json.dump(img, f)
-
-
-
-def connect_driver(event):
-	port = appUi.combo_ser_port.get()
-	baud = appUi.combo_ser_baudrate.get()
-	if baud.isnumeric():
-		print(f"connect to {port} in {baud}bps")
-		print(f"connecting...")
-
 if __name__ == "__main__":
 	# load ui
 	appUi = AppUI.AppUI()
@@ -270,38 +224,9 @@ if __name__ == "__main__":
 	appUi.canvas.bind('<Motion>', hover_display)
 	appUi.canvas.bind('<Button-1>', paint_display)
 	appUi.button_new.bind("<ButtonRelease-1>", test)
+	
 
 	appUi.entry_coor.configure(state="readonly", readonlybackground="white")
 	appUi.entry_color.configure(state="readonly", readonlybackground="white")
-
-	# button import
-	appUi.button_import.bind("<ButtonRelease-1>", import_file)
-	# button export
-	appUi.button_export.bind("<ButtonRelease-1>", export_file)
-	# button connect
-	appUi.button_connect.bind("<ButtonRelease-1>", connect_driver)
-
-	# Brush color
-	appUi.entry_brush.bind("<Button>", choose_brush_color)
-	apply_brush_color(appUi.get_brush_color())
-
-	# Color Space
-	appUi.combo_colorspace.configure(
-			values=["RGB","Red","Green","Blue","Grey"], state="readonly") # background color?
-	appUi.combo_colorspace.current(0)
-
-	# Color Depth"
-	appUi.combo_colordepth.configure(values=["8bits","4bits"], state="readonly") # background color?
-	appUi.combo_colordepth.current(0)
-
-	# Com Port
-	comports = list(serial.tools.list_ports.comports(include_links=True))
-	appUi.combo_ser_port.configure(values=comports)
-	appUi.combo_ser_port.current(0)
-
-	# BaudRate
-	baud = ['4800','9600','19200','38400','57600','115200','230400','460800','921600']
-	appUi.combo_ser_baudrate.configure(values=baud)
-	appUi.combo_ser_baudrate.current(0)
 
 	appUi.run()
