@@ -442,6 +442,10 @@ class AppUI():
     	height=88.0
 		)
 
+		# todo:
+		# this self.treeview should replace entry_output
+		self.treeview = ttk.Treeview(self._root)
+
 	def new_image(self):
 		self.image.close()
 		self.image = Image.new("RGB", self.disp_resolution, "white")
@@ -493,6 +497,30 @@ class AppUI():
 	def set_brush_color(self, color):
 		self.brush_color = color
 	
+	def generate_treeview(self, res_x, res_y):
+		try:
+
+			for i in self.treeview.get_children():
+				self.treeview.delete(i)
+
+			# treeview = ttk.Treeview(self._root, res_y)
+			list_idx = [str(i) for i in range(res_x)]
+			self.treeview["columns"] = list_idx
+			for i in range(res_x):
+				self.treeview.column("#"+str(i), width=6)
+
+			for i in range(res_x):
+				self.treeview.insert("", 'end', text="text", values=[i for j in range(res_y)])
+
+			self.treeview.place(
+			x=210.0,
+			y=496.0,
+			width=580.0,
+			height=88.0)
+
+		except Exception as e:
+			pass
+
 	def run(self):
 		self._root.resizable(False, False)
 		self._root.mainloop()
