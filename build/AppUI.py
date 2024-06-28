@@ -335,14 +335,6 @@ class AppUI():
     	font=("Inter", 12 * -1)
 		)
 
-		self.canvas.create_rectangle(
-	    470.0,
-    	25.0,
-    	590.0,
-    	45.0,
-    	fill="#FFFFFF",
-    	outline="")
-
 		self.canvas.create_text(
     	470.0,
     	10.0,
@@ -351,6 +343,22 @@ class AppUI():
     	fill="#000000",
     	font=("Inter", 12 * -1)
 		)
+		# control mode
+		# self.canvas.create_rectangle(
+	  #   470.0,
+    # 	25.0,
+    # 	590.0,
+    # 	45.0,
+    # 	fill="#FFFFFF",
+    # 	outline="")
+		self.combo_control_mode = ttk.Combobox()
+		self.combo_control_mode.place(
+			x=470.0,
+			y=25.0,
+			width=120.0,
+			height=20.0
+		)
+
 
 		# Brush
 		self.entry_brush_var = StringVar()
