@@ -1,3 +1,12 @@
+# new source code
+./build/gui.py : generated with figma and Tkinter-Designer (used as a template)
+./build/AppUI.py : re-Implementation of UI Class
+./build/app.py : App implementation main entry point
+'''
+python app.py
+'''
+./build/ssd1327.py : SSD1327 Driver to be added
+
 # app_sim_ssd1327
 GUI APP that interact with SSD1327 driver
 
