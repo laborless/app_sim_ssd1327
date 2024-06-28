@@ -1,9 +1,11 @@
 import AppUI
 from tkinter import messagebox,colorchooser,filedialog
-from PIL import ImageColor
+from PIL import ImageColor, Image
 import serial.tools.list_ports
 import json
+import math
 
+FILL_COLOR = "white"
 
 
 pixel_string = " "
@@ -204,6 +206,32 @@ def test(event):
 	except Exception as e:
 		messagebox.showerror(title="Error", message="Please verify resolution!")
 
+def re_render_display_test():
+	# Empty grid display
+	appUi.render_display()
+
+	# Draw All Image --> we need this function
+	line_width = appUi.get_display_line_width()
+
+	color = appUi.get_brush_color()
+	
+	disp_pos_x, disp_pos_y = appUi.get_display_offset()
+	
+	disp_pos_x += appUi.disp_offset[0]
+	disp_pos_y += appUi.disp_offset[1]
+
+	for x in range(appUi.disp_resolution[0]):
+		for y in range(appUi.disp_resolution[1]):
+			
+			color = '#%02x%02x%02x' % appUi.image.getpixel((x, y))
+			# drawing
+			x_st = disp_pos_x + line_width + ( x * (appUi.disp_pixel[0] + line_width) )
+			y_st = disp_pos_y + line_width + ( y * (appUi.disp_pixel[1] + line_width) )
+			appUi.canvas.create_rectangle(x_st, y_st, x_st + appUi.disp_pixel[0],
+									y_st + appUi.disp_pixel[1], fill=color, width=0)
+
+	# update output
+	output_color_string()
 def test2(event):
 	val = 1
 	strr = "1." + str(val)
@@ -235,9 +263,27 @@ def choose_brush_color(event):
 def import_file(event):
 	path = filedialog.askopenfilename(title='Import')
 	if path:
-		with open(path, 'r') as f:
-			img = json.load(f)
-			print(img)
+		isImage = True
+		try:
+			with Image.open(path) as im:
+				print("format", im.format)
+				im = im.convert('RGB')
+				appUi.image.close()
+				appUi.image = im.resize((appUi.disp_resolution[0], appUi.disp_resolution[1]))
+				re_render_display_test() # to be replaced to good one
+		except:
+			isImage = False
+		
+		if not isImage:
+			try:
+				with open(path, 'r') as f:
+					img = json.load(f)
+					print(img)
+					# TODO: Need to draw image from test color map
+					# re_render_display_test() # to be replaced to good one
+			except:
+				print("bad input")
+				pass
 
 def export_file(event):
 	path = filedialog.asksaveasfilename(title='Export')
@@ -253,6 +299,53 @@ def export_file(event):
 			json.dump(img, f)
 
 
+def move_image(st, end):
+	line_width = appUi.get_display_line_width()
+	dist = ((st[0]-end[0])/(appUi.disp_pixel[0]+line_width), (st[1]-end[1])/(appUi.disp_pixel[1]+line_width))
+	appUi.image = appUi.image.transform((appUi.image.width, appUi.image.height),
+									  Image.AFFINE, (1, 0, dist[0], 0, 1, dist[1]),
+										fill=1 ,fillcolor = FILL_COLOR)
+
+def rotate_image(st, end):
+	line_width = appUi.get_display_line_width()
+	grid_offset = appUi.get_display_offset() # need to change name ..it's confusing
+	center = ((appUi.disp_offset[0]+grid_offset[0]+appUi.disp_width//2), (appUi.disp_offset[1]+grid_offset[1]+appUi.disp_height//2))
+	
+	vect1 = ((st[0]-center[0])/(appUi.disp_pixel[0]+line_width), (st[1]-center[1])/(appUi.disp_pixel[1]+line_width))
+	vect2 = ((end[0]-center[0])/(appUi.disp_pixel[0]+line_width), (end[1]-center[1])/(appUi.disp_pixel[1]+line_width))
+
+	angle = math.degrees(math.atan2(vect1[1],vect1[0]) - math.atan2(vect2[1],vect2[0]) )
+
+	appUi.image = appUi.image.rotate(angle, fillcolor = FILL_COLOR)
+
+
+# Is ther better way instead of using global variable?
+pos_start = None
+
+def canvas_enter(event):
+	print("canvas enter")
+def canvas_leave(event):
+	global pos_start
+	pos_start= None
+	# print("canvas leave")
+
+def canvas_LeftButtonDown(event):
+	global pos_start
+	pos_start = (event.x, event.y)
+
+
+def canvas_LeftButtonUp(event):
+	global pos_start
+	if pos_start:
+		mode = appUi.combo_control_mode.current()
+		if mode == 2 :
+			move_image(pos_start, (event.x, event.y))
+		elif mode == 3 :
+			rotate_image(pos_start, (event.x, event.y))
+
+		re_render_display_test() # to be replaced to good one
+
+	pos_start = None
 
 def connect_driver(event):
 	port = appUi.combo_ser_port.get()
@@ -268,7 +361,14 @@ if __name__ == "__main__":
 	# implementation Fcn
 	appUi.canvas.bind("<B1-Motion>", paint_display)
 	appUi.canvas.bind('<Motion>', hover_display)
-	appUi.canvas.bind('<Button-1>', paint_display)
+	# appUi.canvas.bind('<Button-1>', paint_display)
+
+	# appUi.canvas.bind("<Enter>", canvas_enter)
+	appUi.canvas.bind("<Leave>", canvas_leave)
+	appUi.canvas.bind("<Button-1>", canvas_LeftButtonDown)
+	appUi.canvas.bind("<ButtonRelease-1>", canvas_LeftButtonUp)
+
+
 	appUi.button_new.bind("<ButtonRelease-1>", test)
 
 	appUi.entry_coor.configure(state="readonly", readonlybackground="white")
@@ -293,6 +393,11 @@ if __name__ == "__main__":
 	# Color Depth"
 	appUi.combo_colordepth.configure(values=["8bits","4bits"], state="readonly") # background color?
 	appUi.combo_colordepth.current(0)
+
+	# Control mode
+	control_modes = ['Inspect','Paint','Move','Rotate']
+	appUi.combo_control_mode.configure(values=control_modes, state="readonly") # background color?
+	appUi.combo_control_mode.current(0)
 
 	# Com Port
 	comports = list(serial.tools.list_ports.comports(include_links=True))
