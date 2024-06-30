@@ -277,10 +277,28 @@ def import_file(event):
 		if not isImage:
 			try:
 				with open(path, 'r') as f:
-					img = json.load(f)
-					print(img)
+					jsn = json.load(f)
 					# TODO: Need to draw image from test color map
 					# re_render_display_test() # to be replaced to good one
+					w = jsn.pop('width')
+					h = jsn.pop('height')
+					img = jsn.pop('image')
+					appUi.entry_res_x_var.set(w)
+					appUi.entry_res_y_var.set(h)
+					
+					test(event=None)
+					cnt = 0
+					for pixstr in img.split(','):
+						val = int(pixstr, 16)
+						pixval = (val & 255, val >> 8 & 255, val >> 16 & 255)
+						appUi.set_image(cnt % w, cnt / w, pixval)
+						cnt += 1
+						if cnt >= w * h:
+							break
+						
+					# update display
+					re_render_display_test()
+
 			except:
 				print("bad input")
 				pass
@@ -295,7 +313,7 @@ def export_file(event):
 			img["space"] = appUi.combo_colorspace.get()
 			img["depth"] = appUi.combo_colordepth.get()
 			img["NbRemap"] = appUi.check_nb_remap_var.get()
-			img["image"] = [] # to be implemented
+			img["image"] = pixel_string
 			json.dump(img, f)
 
 
@@ -409,4 +427,5 @@ if __name__ == "__main__":
 	appUi.combo_ser_baudrate.configure(values=baud)
 	appUi.combo_ser_baudrate.current(0)
 
+	output_color_string()
 	appUi.run()

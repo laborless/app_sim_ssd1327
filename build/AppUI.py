@@ -41,6 +41,7 @@ class AppUI():
 		
 
 		self.image = Image.new("RGB", self.disp_resolution, "white")
+		self.pixels = self.image.load()
 		self.image_draw = ImageDraw.Draw(self.image)
 
 		self._root = Tk()
@@ -453,7 +454,11 @@ class AppUI():
 	def new_image(self):
 		self.image.close()
 		self.image = Image.new("RGB", self.disp_resolution, "white")
+		self.pixels = self.image.load()
 		self.image_draw = ImageDraw.Draw(self.image)
+
+	def set_image(self, x, y, val):
+		self.pixels[x, y] = val
 
 	def render_display(self):
 		pix_width = 1
