@@ -6,7 +6,8 @@ import json
 import math
 
 FILL_COLOR = "white"
-
+LIMIT_PHYS_X = 32
+LIMIT_PHYS_Y = 32
 
 pixel_string = " "
 pixel_string_seperator = ","
@@ -196,6 +197,10 @@ def test(event):
 	# 1. ask to export?
 	try:
 		res = (appUi.entry_res_x_var.get(), appUi.entry_res_y_var.get())
+		if res[0] > LIMIT_PHYS_X or res[1] > LIMIT_PHYS_Y:
+			messagebox.showerror(title="Error", message=f"resolution! out of range({LIMIT_PHYS_X},{LIMIT_PHYS_Y})")
+			return	
+			
 		if res[0] > 0 and res[0] <= appUi.disp_limit[0] and res[1] > 0 and res[1] <= appUi.disp_limit[1]:
 			appUi.disp_resolution = res
 			appUi.new_image()
